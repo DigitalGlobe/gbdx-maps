@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="   crossorigin="anonymous"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.28.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.28.0/mapbox-gl.css' rel='stylesheet' />
+
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+        figure { display:block; position:absolute; bottom:0; left:0; margin:0; padding:0; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<pre id='info'></pre>
+
+<figure>
+  <img src="../../images/building-detection/colorbar.png" alt="colorbar" width=200 height=40>
+</figure>
+
+<script>
+
+mapboxgl.accessToken = 'pk.eyJ1IjoibmFsZGVib3JnaCIsImEiOiJjaXc2ejFpYjYwMGM3Mm9ta3l6OHN0bTU5In0.-OCFh3DWXZaAq0AHlgj_Og';
+
+var map = new mapboxgl.Map({
+    container: 'map', // container id
+    style: 'mapbox://styles/mapbox/streets-v9', //stylesheet location
+    center: [12.78, 13.35], // starting position
+    zoom: 12 // starting zoom
+});
+
+map.on('load', function() {
+    map.addSource('diffa', {
+        'type': 'raster',
+        'url': 'mapbox://platformstories.building-detection-diffa',
+        'tileSize': 256
+    });
+
+    map.addLayer({
+        'id': 'diffa',
+        'type': 'raster',
+        'source': 'diffa',
+        'minzoom': 0,
+        'maxzoom': 22
+    });
+
+    map.addSource('diffa-heatmap', {
+        type: 'vector',
+        url: 'mapbox://platformstories.building-detection-diffa-heatmap'
+    });
+
+    map.addLayer({
+        "id": "diffa-heatmap",
+        "type": "fill",
+        "source": "diffa-heatmap",
+        "source-layer": "building-detection-diffa-heatmap",
+        "paint": {
+            "fill-color": {
+                "property": "certainty",
+                "type": "interval",
+                "stops": [
+                    ["0.5", "rgba(252, 255, 252, 0.25)"],
+                    ["0.55", "rgba(224, 255, 224, 0.25)"],
+                    ["0.6", "rgba(196, 255, 196, 0.25)"],
+                    ["0.65", "rgba(168, 255, 168, 0.25)"],
+                    ["0.7", "rgba(140, 255, 140, 0.25)"],
+                    ["0.75", "rgba(112, 255, 112, 0.25)"],
+                    ["0.8", "rgba(84, 255, 84, 0.25)"],
+                    ["0.85", "rgba(56, 255, 56, 0.25)"],
+                    ["0.9", "rgba(28, 255, 28, 0.25)"],
+                    ["0.95", "rgba(0, 255, 0, 0.25)"],
+                ]
+            },
+            "fill-outline-color": {
+                "property": "certainty",
+                "type": "interval",
+                "stops": [
+                    ["0.5", "rgba(252, 255, 252, 0.6)"],
+                    ["0.55", "rgba(224, 255, 224, 0.6)"],
+                    ["0.6", "rgba(196, 255, 196, 0.6)"],
+                    ["0.65", "rgba(168, 255, 168, 0.6)"],
+                    ["0.7", "rgba(140, 255, 140, 0.6)"],
+                    ["0.75", "rgba(112, 255, 112, 0.6)"],
+                    ["0.8", "rgba(84, 255, 84, 0.6)"],
+                    ["0.85", "rgba(56, 255, 56, 0.6)"],
+                    ["0.9", "rgba(28, 255, 28, 0.6)"],
+                    ["0.95", "rgba(0, 255, 0, 0.6)"]
+                ]
+            }
+        }
+    });
+
+});
+
+map.addControl(new mapboxgl.NavigationControl());
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Platform Stories Login</title>
+	<meta charset="utf-8" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        html, body, #mapid {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+
+</head>
+<body>
+
+	  <script src="https://cdn.auth0.com/js/lock/10.3/lock.min.js"></script>
+    <script>
+    var lock = new Auth0Lock('lUHFRPH8sqWDyoKruYmRljkSHqnwI0hm', 'digitalglobe-platform.auth0.com', {
+        // container: 'root',
+        initialScreen: localStorage.getItem('userHasEverLoggedIn') ? 'login' : 'signUp',
+        theme: {
+            logo: '../images/digitalglobe-developers-logo-2color-540x285.png',
+            primaryColor: '#709900'
+        },
+        auth: {
+            params: {
+                scope: 'openid email offline_access'
+            }
+        }
+    });
+    var onAuthenticated = function() {
+        localStorage.setItem('userHasEverLoggedIn', true);
+        window.location = localStorage.getItem('desiredUrlAfterAuth') || 'https://platformstories.github.io';
+    };
+    lock.on('authenticated', function(authResult) {
+        if (!authResult.idToken) return;
+
+        // We don't care about the profile, but we want to validate the token.
+        lock.getProfile(authResult.idToken, function(error, profile) {
+            if (error) {
+                // Handle error
+                alert(error.message || error || 'Login failed. Please try again.');
+                lock.show();
+                return;
+            }
+
+            localStorage.setItem('idToken', authResult.idToken);
+            onAuthenticated();
+        });
+    });
+    lock.on('unrecoverable_error', function(result) {
+        alert('Error:' + result.error_description);
+    });
+    lock.on('authorization_error', function(result) {
+        alert('Error:' + result.error_description);
+    });
+
+    if (localStorage.getItem('idToken')) {
+        // We don't care about the profile, but we want to validate the token.
+        lock.getProfile(localStorage.getItem('idToken') || null, function(error, profile) {
+            if (error) {
+                // Handle error
+                lock.show();
+                return;
+            }
+
+            onAuthenticated();
+        });
+    } else {
+        lock.show();
+    }
+    </script>
+
+</body>
+</html>
